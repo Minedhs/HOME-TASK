@@ -12,9 +12,9 @@ const videos = [
         title: "Work",
         author: "Sasha",
         canBeDownloaded: false,
-        minAgeRestriction: null,
-        createdAt: "2022-11-10",
-        publicationDate: "2022-11-10",
+        minAgeRestriction: 1,
+        createdAt: "2022-11-12",
+        publicationDate: "2022-11-13",
         availableResolutions: ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160']
     }
 ];
@@ -78,14 +78,18 @@ app.post('/videos', (req, res) => {
             }
         }
     }
+    const today = new Date();
+    const nextDay = new Date(new Date().setDate(new Date().getDay() + 1));
+    let download = req.body.canBeDownloaded;
+    let ages = req.body.minAgeRestriction;
     const newVideo = {
-        id: req.body.id,
+        id: +(new Date()),
         title: title,
         author: author,
-        canBeDownloaded: req.body.canBeDownloaded,
-        minAgeRestriction: req.body.minAgeRestriction,
-        createdAt: req.body.createdAt,
-        publicationDate: req.body.publicationDate,
+        canBeDownloaded: download,
+        minAgeRestriction: ages,
+        createdAt: today.toISOString(),
+        publicationDate: nextDay.toISOString(),
         availableResolutions: resolutions
     };
     videos.push(newVideo);

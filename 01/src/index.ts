@@ -9,9 +9,9 @@ const videos = [
         title: "Work",
         author: "Sasha",
         canBeDownloaded: false,
-        minAgeRestriction: null,
-        createdAt: "2022-11-10",
-        publicationDate: "2022-11-10",
+        minAgeRestriction: 1,
+        createdAt: "2022-11-12",
+        publicationDate: "2022-11-13",
         availableResolutions: [ 'P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160' ]
     }]
 const availableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
@@ -44,21 +44,21 @@ app.delete('/videos/:id', (req: Request, res: Response) => {
     res.send(404)
 })
 app.post('/videos', (req: Request, res: Response) => {
-    let title = req.body.title
+    let title: string = req.body.title
     if(!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect title", "field": "title"}],
         })
         return;
     }
-    let author = req.body.author
+    let author: string = req.body.author
     if(!author || typeof author !== 'string' || !author.trim() || author.length > 20) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect author", "field": "author"}],
         })
         return;
     }
-    let resolutions = req.body.availableResolutions
+    let resolutions: Array<string> = req.body.availableResolutions
     if (Array.isArray(resolutions) && resolutions.length < 1) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect resolution", "field": "availableResolutions"}],
@@ -75,35 +75,39 @@ app.post('/videos', (req: Request, res: Response) => {
             }
         }
     }
+    const today = new Date();
+    const nextDay = new Date(new Date().setDate(new Date().getDay() + 1));
+    let download: boolean = req.body.canBeDownloaded;
+    let ages: number = req.body.minAgeRestriction;
     const newVideo = {
-        id: req.body.id,
+        id: +(new Date()),
         title: title,
         author: author,
-        canBeDownloaded: req.body.canBeDownloaded,
-        minAgeRestriction: req.body.minAgeRestriction,
-        createdAt: req.body.createdAt,
-        publicationDate: req.body.publicationDate,
+        canBeDownloaded: download,
+        minAgeRestriction: ages,
+        createdAt: today.toISOString(),
+        publicationDate: nextDay.toISOString(),
         availableResolutions: resolutions
     }
     videos.push(newVideo)
     res.status(201).send(newVideo)
 })
 app.put('/videos/:id', (req: Request, res: Response) => {
-    let title = req.body.title
+    let title: string = req.body.title
     if(!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect title", "field": "title"}], resultCode: 1
         })
         return;
     }
-    let author = req.body.author
+    let author: string  = req.body.author
     if(!author || typeof author !== 'string' || !author.trim() || author.length > 20) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect author", "field": "author"}],
         })
         return;
     }
-    let resolutions = req.body.availableResolutions
+    let resolutions: Array<string> = req.body.availableResolutions
     if (Array.isArray(resolutions) && resolutions.length < 1) {
         res.status(400).send({
             errorsMessages: [{"message": "Incorrect resolution", "field": "availableResolutions"}],
