@@ -8,7 +8,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 let videos = [];
-const validResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
+const availableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
 const parserMiddleware = (0, body_parser_1.default)({});
 app.use(parserMiddleware);
 app.get('/videos', (req, res) => {
@@ -47,16 +47,16 @@ app.post('/videos', (req, res) => {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
-        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-    }
-    if (resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = validResolutions.includes(resolutions[i]);
-            if (!isIncludes) {
-                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-            }
-            break;
+    if (availableResolutions) {
+        if (!Array.isArray(availableResolutions)) {
+            error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
+        }
+        else {
+            availableResolutions.forEach(resolution => {
+                !availableResolutions.includes(resolution) && error.errorsMessages.push({
+                    "message": "Incorrect resolution", "field": "availableResolutions"
+                });
+            });
         }
     }
     if (error.errorsMessages.length) {
@@ -89,16 +89,16 @@ app.put('/videos/:id', (req, res) => {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
-        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-    }
-    if (resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = validResolutions.includes(resolutions[i]);
-            if (!isIncludes) {
-                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-            }
-            break;
+    if (availableResolutions) {
+        if (!Array.isArray(availableResolutions)) {
+            error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
+        }
+        else {
+            availableResolutions.forEach(resolution => {
+                !availableResolutions.includes(resolution) && error.errorsMessages.push({
+                    "message": "Incorrect resolution", "field": "availableResolutions"
+                });
+            });
         }
     }
     if (error.errorsMessages.length) {
@@ -110,9 +110,9 @@ app.put('/videos/:id', (req, res) => {
         video.title = title;
         video.author = author;
         video.availableResolutions = resolutions;
-        video.canBeDownloaded = req.body.canBeDownloaded;
-        video.minAgeRestriction = req.body.minAgeRestriction;
-        video.publicationDate = req.body.publicationDate;
+        video.canBeDownloaded = Boolean(req.body.canBeDownloaded);
+        video.minAgeRestriction = Number(req.body.minAgeRestriction);
+        video.publicationDate = String(req.body.publicationDate);
         res.send(204);
         return;
     }

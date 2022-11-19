@@ -1,11 +1,11 @@
 import express,{Request, Response} from 'express'
 import bodyParser from  'body-parser'
-import {isNumberObject} from "util/types";
+import {isBooleanObject, isNumberObject} from "util/types";
 const app = express()
 const port = process.env.PORT || 5000
 
 let videos: any[] = []
-const validResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
+const availableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
 
 const parserMiddleware = bodyParser({})
 app.use(parserMiddleware)
@@ -36,7 +36,7 @@ app.delete('/videos/:id', (req: Request, res: Response) => {
 })
 app.post('/videos', (req: Request, res: Response) => {
     let title: string = req.body.title
-    let error: {"errorsMessages": any[]} = {"errorsMessages": [ ]};
+    let error: {"errorsMessages": any[]} = {"errorsMessages": [ ]}
     if(!title || !title.trim() || title.length > 40) {
         error.errorsMessages.push({"message": "Incorrect title", "field": "title"})
     }
@@ -44,19 +44,17 @@ app.post('/videos', (req: Request, res: Response) => {
     if(!author || !author.trim() || author.length > 20) {
         error.errorsMessages.push({"message": "Incorrect author", "field": "author"})
     }
-    let resolutions: Array<string> = req.body.availableResolutions
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
+    let resolutions = req.body.availableResolutions
+    if (availableResolutions) {
+        if (!Array.isArray(availableResolutions)) {
         error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
-    }
-    if(resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = validResolutions.includes(resolutions[i])
-            if (!isIncludes) {
-                    error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
-                }
-                break;
-            }
+    } else {
+            availableResolutions.forEach(resolution => {
+                !availableResolutions.includes(resolution) && error.errorsMessages.push({
+                    "message": "Incorrect resolution", "field": "availableResolutions"})
+            })
         }
+    }
     if (error.errorsMessages.length) {
         res.status(400).send(error)
         return;
@@ -87,16 +85,14 @@ app.put('/videos/:id', (req: Request, res: Response) => {
         error.errorsMessages.push({"message": "Incorrect author", "field": "author"})
     }
     let resolutions: Array<string> = req.body.availableResolutions
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
-        error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
-    }
-    if(resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = validResolutions.includes(resolutions[i])
-            if (!isIncludes) {
-                error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
-            }
-            break;
+    if (availableResolutions) {
+        if (!Array.isArray(availableResolutions)) {
+            error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
+        } else {
+            availableResolutions.forEach(resolution => {
+                !availableResolutions.includes(resolution) && error.errorsMessages.push({
+                    "message": "Incorrect resolution", "field": "availableResolutions"})
+            })
         }
     }
     if (error.errorsMessages.length) {
@@ -108,9 +104,9 @@ app.put('/videos/:id', (req: Request, res: Response) => {
         video.title = title;
         video.author = author;
         video.availableResolutions = resolutions;
-        video.canBeDownloaded = req.body.canBeDownloaded;
-        video.minAgeRestriction = req.body.minAgeRestriction;
-        video.publicationDate = req.body.publicationDate;
+        video.canBeDownloaded = Boolean(req.body.canBeDownloaded);
+        video.minAgeRestriction = Number(req.body.minAgeRestriction);
+        video.publicationDate = String(req.body.publicationDate);
         res.send(204)
         return;
     } else {
