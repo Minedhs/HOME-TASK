@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "express-products-vercel",
+  "builds": [
+    { "src": "01/src/index.ts", "use": "@vercel/node"}
+  ],
+  "routes": [
+    {"src": "/(.*)", "dest": "/01/src/index.ts"}
+  ]
+}
