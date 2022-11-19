@@ -46,7 +46,7 @@ app.post('/videos', (req, res) => {
     if (!author || !author.trim() || author.length > 20) {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
-    let resolutions = req.body.availableResolutions;
+    let availableResolutions = req.body.availableResolutions;
     if (availableResolutions) {
         if (!Array.isArray(availableResolutions)) {
             error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
@@ -72,7 +72,7 @@ app.post('/videos', (req, res) => {
         minAgeRestriction: null,
         createdAt: new Date().toISOString(),
         publicationDate: newDay.toISOString(),
-        availableResolutions: resolutions
+        availableResolutions: availableResolutions
     };
     videos.push(newVideo);
     res.status(201).send(newVideo);
@@ -88,7 +88,7 @@ app.put('/videos/:id', (req, res) => {
     if (!author || !author.trim() || author.length > 20) {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
-    let resolutions = req.body.availableResolutions;
+    let availableResolutions = req.body.availableResolutions;
     if (availableResolutions) {
         if (!Array.isArray(availableResolutions)) {
             error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
@@ -101,6 +101,10 @@ app.put('/videos/:id', (req, res) => {
             });
         }
     }
+    let download = req.body.canBeDownloaded;
+    if (!download) {
+        error.errorsMessages.push({ "message": "Incorrect download", "field": "canBeDownloaded" });
+    }
     if (error.errorsMessages.length) {
         res.status(400).send(error);
         return;
@@ -109,10 +113,10 @@ app.put('/videos/:id', (req, res) => {
     if (video) {
         video.title = title;
         video.author = author;
-        video.availableResolutions = resolutions;
+        video.availableResolutions = availableResolutions;
         video.canBeDownloaded = Boolean(req.body.canBeDownloaded);
-        video.minAgeRestriction = Number(req.body.minAgeRestriction);
-        video.publicationDate = String(req.body.publicationDate);
+        video.minAgeRestriction = download;
+        video.publicationDate = req.body.publicationDate;
         res.send(204);
         return;
     }
