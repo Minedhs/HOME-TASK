@@ -7,17 +7,7 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
-const videos = [
-    { id: 1,
-        title: "Work",
-        author: "Sasha",
-        canBeDownloaded: false,
-        minAgeRestriction: null,
-        createdAt: "2022-11-12",
-        publicationDate: "2022-11-13",
-        availableResolutions: ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160']
-    }
-];
+let videos = [];
 const validResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
 const parserMiddleware = (0, body_parser_1.default)({});
 app.use(parserMiddleware);
@@ -120,9 +110,9 @@ app.put('/videos/:id', (req, res) => {
         video.title = title;
         video.author = author;
         video.availableResolutions = resolutions;
-        video.canBeDownloaded = false;
-        video.minAgeRestriction = null;
-        video.publicationDate = new Date().toISOString();
+        video.canBeDownloaded = req.body.canBeDownloaded;
+        video.minAgeRestriction = req.body.minAgeRestriction;
+        video.publicationDate = req.body.publicationDate;
         res.send(204);
         return;
     }
