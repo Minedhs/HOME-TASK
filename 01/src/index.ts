@@ -14,7 +14,7 @@ const videos = [
         publicationDate: "2022-11-13",
         availableResolutions: [ 'P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160' ]
     }]
-const availableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
+const validResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
 
 const parserMiddleware = bodyParser({})
 app.use(parserMiddleware)
@@ -30,7 +30,7 @@ app.get('/videos/:id', (req: Request, res: Response) => {
         res.send(404)
     }
 })
-app.delete('/ht_01/api/testing/all-data', (req: Request, res: Response) => {
+app.delete('/testing/all-data', (req: Request, res: Response) => {
     res.status(204).send("All data is deleted")
 })
 app.delete('/videos/:id', (req: Request, res: Response) => {
@@ -59,7 +59,7 @@ app.post('/videos', (req: Request, res: Response) => {
     }
     if(resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = availableResolutions.includes(resolutions[i])
+            const isIncludes = validResolutions.includes(resolutions[i])
             if (!isIncludes) {
                     error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
                 }
@@ -70,10 +70,7 @@ app.post('/videos', (req: Request, res: Response) => {
         res.status(400).send(error)
         return;
     }
-    const newDay = (date:any) => {
-        const newDate = date.toISOString()
-        return new Date(Date.parse(newDate) + 1440 * 60000).toISOString()
-    }
+    const newDay = new Date(new Date().setDate(new Date().getDate() + 1))
     const newVideo = {
         id: +(new Date()),
         title: title,
@@ -81,11 +78,12 @@ app.post('/videos', (req: Request, res: Response) => {
         canBeDownloaded: false,
         minAgeRestriction: null,
         createdAt: new Date().toISOString(),
-        publicationDate: newDay.toString(),
+        publicationDate: newDay.toISOString(),
         availableResolutions: resolutions
     }
     videos.push(newVideo)
     res.status(201).send(newVideo)
+    return;
 })
 app.put('/videos/:id', (req: Request, res: Response) => {
     let title: string = req.body.title
@@ -103,7 +101,7 @@ app.put('/videos/:id', (req: Request, res: Response) => {
     }
     if(resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = availableResolutions.includes(resolutions[i])
+            const isIncludes = validResolutions.includes(resolutions[i])
             if (!isIncludes) {
                 error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
             }
@@ -123,9 +121,11 @@ app.put('/videos/:id', (req: Request, res: Response) => {
         video.minAgeRestriction = null;
         video.publicationDate = new Date().toISOString();
         res.send(204)
+        return;
     } else {
         res.send(404)
     }
+
 })
 
 app.listen(port, () => {

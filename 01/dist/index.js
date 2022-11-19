@@ -18,7 +18,7 @@ const videos = [
         availableResolutions: ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160']
     }
 ];
-const availableResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
+const validResolutions = ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160'];
 const parserMiddleware = (0, body_parser_1.default)({});
 app.use(parserMiddleware);
 app.get('/videos', (req, res) => {
@@ -33,7 +33,7 @@ app.get('/videos/:id', (req, res) => {
         res.send(404);
     }
 });
-app.delete('/ht_01/api/testing/all-data', (req, res) => {
+app.delete('/testing/all-data', (req, res) => {
     res.status(204).send("All data is deleted");
 });
 app.delete('/videos/:id', (req, res) => {
@@ -62,7 +62,7 @@ app.post('/videos', (req, res) => {
     }
     if (resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = availableResolutions.includes(resolutions[i]);
+            const isIncludes = validResolutions.includes(resolutions[i]);
             if (!isIncludes) {
                 error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
             }
@@ -73,10 +73,7 @@ app.post('/videos', (req, res) => {
         res.status(400).send(error);
         return;
     }
-    const newDay = (date) => {
-        const newDate = date.toISOString();
-        return new Date(Date.parse(newDate) + 1440 * 60000).toISOString();
-    };
+    const newDay = new Date(new Date().setDate(new Date().getDate() + 1));
     const newVideo = {
         id: +(new Date()),
         title: title,
@@ -84,11 +81,12 @@ app.post('/videos', (req, res) => {
         canBeDownloaded: false,
         minAgeRestriction: null,
         createdAt: new Date().toISOString(),
-        publicationDate: newDay.toString(),
+        publicationDate: newDay.toISOString(),
         availableResolutions: resolutions
     };
     videos.push(newVideo);
     res.status(201).send(newVideo);
+    return;
 });
 app.put('/videos/:id', (req, res) => {
     let title = req.body.title;
@@ -106,7 +104,7 @@ app.put('/videos/:id', (req, res) => {
     }
     if (resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
-            const isIncludes = availableResolutions.includes(resolutions[i]);
+            const isIncludes = validResolutions.includes(resolutions[i]);
             if (!isIncludes) {
                 error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
             }
@@ -126,6 +124,7 @@ app.put('/videos/:id', (req, res) => {
         video.minAgeRestriction = null;
         video.publicationDate = new Date().toISOString();
         res.send(204);
+        return;
     }
     else {
         res.send(404);
