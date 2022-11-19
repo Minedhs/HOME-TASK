@@ -12,7 +12,7 @@ const videos = [
         title: "Work",
         author: "Sasha",
         canBeDownloaded: false,
-        minAgeRestriction: 1,
+        minAgeRestriction: null,
         createdAt: "2022-11-12",
         publicationDate: "2022-11-13",
         availableResolutions: ['P144', 'P240', 'P360', 'P480', 'P720', 'P1080', 'P1440', 'P2160']
@@ -33,7 +33,7 @@ app.get('/videos/:id', (req, res) => {
         res.send(404);
     }
 });
-app.delete('/testing/all-data', (req, res) => {
+app.delete('/ht_01/api/testing/all-data', (req, res) => {
     res.status(204).send("All data is deleted");
 });
 app.delete('/videos/:id', (req, res) => {
@@ -48,48 +48,43 @@ app.delete('/videos/:id', (req, res) => {
 });
 app.post('/videos', (req, res) => {
     let title = req.body.title;
-    if (!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect title", "field": "title" }],
-        });
-        return;
+    let error = { "errorsMessages": [] };
+    if (!title || !title.trim() || title.length > 40) {
+        error.errorsMessages.push({ "message": "Incorrect title", "field": "title" });
     }
     let author = req.body.author;
-    if (!author || typeof author !== 'string' || !author.trim() || author.length > 20) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect author", "field": "author" }],
-        });
-        return;
+    if (!author || !author.trim() || author.length > 20) {
+        error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
     if (Array.isArray(resolutions) && resolutions.length < 1) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect resolution", "field": "availableResolutions" }],
-        });
+        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
     }
     if (resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
             const isIncludes = availableResolutions.includes(resolutions[i]);
             if (!isIncludes) {
-                res.status(400).send({
-                    errorsMessages: [{ "message": "Incorrect resolution", "field": "availableResolutions" }],
-                });
-                break;
+                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
             }
+            break;
         }
     }
-    const today = new Date();
-    const nextDay = new Date(new Date().setDate(new Date().getDay() + 1));
-    let download = req.body.canBeDownloaded;
-    let ages = req.body.minAgeRestriction;
+    if (error.errorsMessages.length) {
+        res.status(400).send(error);
+        return;
+    }
+    const newDay = (date) => {
+        const newDate = date.toISOString();
+        return new Date(Date.parse(newDate) + 1440 * 60000).toISOString();
+    };
     const newVideo = {
         id: +(new Date()),
         title: title,
         author: author,
-        canBeDownloaded: download,
-        minAgeRestriction: ages,
-        createdAt: today.toISOString(),
-        publicationDate: nextDay.toISOString(),
+        canBeDownloaded: false,
+        minAgeRestriction: null,
+        createdAt: new Date().toISOString(),
+        publicationDate: newDay.toString(),
         availableResolutions: resolutions
     };
     videos.push(newVideo);
@@ -97,44 +92,39 @@ app.post('/videos', (req, res) => {
 });
 app.put('/videos/:id', (req, res) => {
     let title = req.body.title;
-    if (!title || typeof title !== 'string' || !title.trim() || title.length > 40) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect title", "field": "title" }], resultCode: 1
-        });
-        return;
+    let error = { "errorsMessages": [] };
+    if (!title || !title.trim() || title.length > 40) {
+        error.errorsMessages.push({ "message": "Incorrect title", "field": "title" });
     }
     let author = req.body.author;
-    if (!author || typeof author !== 'string' || !author.trim() || author.length > 20) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect author", "field": "author" }],
-        });
-        return;
+    if (!author || !author.trim() || author.length > 20) {
+        error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
     if (Array.isArray(resolutions) && resolutions.length < 1) {
-        res.status(400).send({
-            errorsMessages: [{ "message": "Incorrect resolution", "field": "availableResolutions" }],
-        });
+        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
     }
     if (resolutions.length > 0) {
         for (let i = 0; i < resolutions.length; i++) {
             const isIncludes = availableResolutions.includes(resolutions[i]);
             if (!isIncludes) {
-                res.status(400).send({
-                    errorsMessages: [{ "message": "Incorrect resolution", "field": "availableResolutions" }],
-                });
-                break;
+                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
             }
+            break;
         }
+    }
+    if (error.errorsMessages.length) {
+        res.status(400).send(error);
+        return;
     }
     let video = videos.find(p => p.id === +req.params.id);
     if (video) {
         video.title = title;
         video.author = author;
         video.availableResolutions = resolutions;
-        video.canBeDownloaded = req.body.canBeDownloaded;
-        video.minAgeRestriction = req.body.minAgeRestriction;
-        video.publicationDate = req.body.publicationDate;
+        video.canBeDownloaded = false;
+        video.minAgeRestriction = null;
+        video.publicationDate = new Date().toISOString();
         res.send(204);
     }
     else {
