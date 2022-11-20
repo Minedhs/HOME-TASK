@@ -6,7 +6,7 @@ const app = express()
 const port = process.env.PORT || 5000
 
 let videos: any[] = []
-const validResolutions = ["144", "240", "360", "480", "720", "1080", "1440", "2160"]
+const validResolutions = ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"]
 
 const parserMiddleware = bodyParser({})
 app.use(parserMiddleware)
@@ -36,16 +36,16 @@ app.delete('/videos/:id', (req: Request, res: Response) => {
     res.send(404)
 })
 app.post('/videos', (req: Request, res: Response) => {
-    let title: string = req.body.title
+    let title = req.body.title
     let error: { "errorsMessages": any[] } = {"errorsMessages": []}
     if (!title || !title.trim() || title.length > 40) {
         error.errorsMessages.push({"message": "Incorrect title", "field": "title"})
     }
-    let author: string = req.body.author
+    let author = req.body.author
     if (!author || !author.trim() || author.length > 20) {
         error.errorsMessages.push({"message": "Incorrect author", "field": "author"})
     }
-    let resolutions: string[] = req.body.availableResolutions
+    let resolutions = req.body.availableResolutions
     if (resolutions) {
         if (!Array.isArray(resolutions)) {
             error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
@@ -76,16 +76,16 @@ app.post('/videos', (req: Request, res: Response) => {
     return;
 })
 app.put('/videos/:id', (req: Request, res: Response) => {
-    let title: string = req.body.title
+    let title = req.body.title
     let error: {"errorsMessages": any[]} = {"errorsMessages": [ ]};
     if(!title || !title.trim() || title.length > 40) {
         error.errorsMessages.push({"message": "Incorrect title", "field": "title"})
     }
-    let author: string = req.body.author
+    let author = req.body.author
     if(!author || !author.trim() || author.length > 20) {
         error.errorsMessages.push({"message": "Incorrect author", "field": "author"})
     }
-    let resolutions: string[] = req.body.availableResolutions
+    let resolutions = req.body.availableResolutions
     if (resolutions) {
         if (!Array.isArray(resolutions)) {
             error.errorsMessages.push({"message": "Incorrect resolution", "field": "availableResolutions"})
@@ -96,8 +96,8 @@ app.put('/videos/:id', (req: Request, res: Response) => {
             })
         }
     }
-    let download: boolean = req.body.canBeDownloaded
-    if (!download) {
+    let download = req.body.canBeDownloaded
+    if (download !== true && download !== false) {
         error.errorsMessages.push({"message": "Incorrect download", "field": "canBeDownloaded"})
     }
     if (error.errorsMessages.length) {

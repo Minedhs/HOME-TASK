@@ -8,7 +8,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 let videos = [];
-const validResolutions = ["144", "240", "360", "480", "720", "1080", "1440", "2160"];
+const validResolutions = ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"];
 const parserMiddleware = (0, body_parser_1.default)({});
 app.use(parserMiddleware);
 app.get('/videos', (req, res) => {
@@ -98,7 +98,7 @@ app.put('/videos/:id', (req, res) => {
         }
     }
     let download = req.body.canBeDownloaded;
-    if (!download) {
+    if (download !== true && download !== false) {
         error.errorsMessages.push({ "message": "Incorrect download", "field": "canBeDownloaded" });
     }
     if (error.errorsMessages.length) {
