@@ -47,14 +47,14 @@ app.post('/videos', (req, res) => {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
-        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-    }
-    if (resolutions.length > 0) {
-        const isInclude = resolutions.every((resolution) => validResolutions.includes(resolution));
-        if (!isInclude) {
+    if (resolutions) {
+        if (!Array.isArray(resolutions)) {
             error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-            return;
+        }
+        else {
+            resolutions.forEach(resolution => {
+                !validResolutions.includes(resolution) && error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
+            });
         }
     }
     if (error.errorsMessages.length) {
@@ -87,21 +87,15 @@ app.put('/videos/:id', (req, res) => {
         error.errorsMessages.push({ "message": "Incorrect author", "field": "author" });
     }
     let resolutions = req.body.availableResolutions;
-    if (Array.isArray(resolutions) && resolutions.length < 1) {
-        error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-    }
-    if (resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isInclude = validResolutions.includes(resolutions[i]);
-            if (!isInclude) {
-                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-                break;
-            }
+    if (resolutions) {
+        if (!Array.isArray(resolutions)) {
+            error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
         }
-    }
-    if (error.errorsMessages.length) {
-        res.status(400).send(error);
-        return;
+        else {
+            resolutions.forEach(resolution => {
+                !validResolutions.includes(resolution) && error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
+            });
+        }
     }
     let download = req.body.canBeDownloaded;
     if (!download) {
