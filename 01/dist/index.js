@@ -51,12 +51,10 @@ app.post('/videos', (req, res) => {
         error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
     }
     if (resolutions.length > 0) {
-        for (let i = 0; i < resolutions.length; i++) {
-            const isInclude = validResolutions.includes(resolutions[i]);
-            if (!isInclude) {
-                error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
-                break;
-            }
+        const isInclude = resolutions.every((resolution) => validResolutions.includes(resolution));
+        if (!isInclude) {
+            error.errorsMessages.push({ "message": "Incorrect resolution", "field": "availableResolutions" });
+            return;
         }
     }
     if (error.errorsMessages.length) {
