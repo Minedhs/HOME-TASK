@@ -105,6 +105,16 @@ app.put('/videos/:id', (req, res) => {
     if (minAge < 1 || minAge > 18) {
         error.errorsMessages.push({ "message": "Incorrect minAgeRestriction", "field": "minAgeRestriction" });
     }
+    function isIsoDate(str) {
+        if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(str))
+            return false;
+        const d = new Date(str);
+        // @ts-ignore
+        return d instanceof Date && !isNaN(d) && d.toISOString() === str;
+    }
+    if (!isIsoDate(req.body.publicationDate)) {
+        error.errorsMessages.push({ "message": "Incorrect publicationDate", "field": "publicationDate" });
+    }
     if (error.errorsMessages.length) {
         res.status(400).send(error);
         return;
@@ -116,7 +126,7 @@ app.put('/videos/:id', (req, res) => {
         video.availableResolutions = resolutions;
         video.canBeDownloaded = download;
         video.minAgeRestriction = minAge || null;
-        video.publicationDate = new Date().toISOString();
+        video.publicationDate = req.body.publicationDate;
         res.send(204);
         return;
     }
