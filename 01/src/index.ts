@@ -100,6 +100,10 @@ app.put('/videos/:id', (req: Request, res: Response) => {
     if (download !== true && download !== false) {
         error.errorsMessages.push({"message": "Incorrect download", "field": "canBeDownloaded"})
     }
+    let minAge = req.body.minAgeRestriction
+    if (minAge < 1 || minAge > 18) {
+        error.errorsMessages.push({"message": "Incorrect minAgeRestriction", "field": "minAgeRestriction"})
+    }
     if (error.errorsMessages.length) {
         res.status(400).send(error)
         return;
@@ -110,8 +114,8 @@ app.put('/videos/:id', (req: Request, res: Response) => {
         video.author = author;
         video.availableResolutions = resolutions;
         video.canBeDownloaded = download;
-        video.minAgeRestriction = Number(req.body.minAgeRestriction);
-        video.publicationDate = String(req.body.publicationDate);
+        video.minAgeRestriction = minAge || null;
+        video.publicationDate = new Date().toISOString();
         res.send(204)
         return;
     } else {
